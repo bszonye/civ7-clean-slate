@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Database>
+    <EnglishText>
+        <Row Tag="LOC_MOD_BZ_CLEAN_SLATE_NAME">
+            <Text>Clean Slate</Text>
+        </Row>
+        <Row Tag="LOC_MOD_BZ_CLEAN_SLATE_DESCRIPTION">
+            <Text>better diplomacy ribbon stats</Text>
+        </Row>
+    </EnglishText>
+</Database>

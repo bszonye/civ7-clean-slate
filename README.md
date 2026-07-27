@@ -1,2 +1,2 @@
-# civ7-clean-slate
-Clean Slate mod for Civilization VII
+# Clean Slate 1.0.0
+better diplomacy ribbon stats

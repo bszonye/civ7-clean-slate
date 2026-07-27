@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Mod id="bz-clean-slate" version="1.0.0" xmlns="ModInfo">
+    <Properties>
+        <Name>LOC_MOD_BZ_CLEAN_SLATE_NAME</Name>
+        <Version>1.0.0</Version>
+        <Description>LOC_MOD_BZ_CLEAN_SLATE_DESCRIPTION</Description>
+        <Authors>beezany</Authors>
+        <Package>Mod</Package>
+        <AffectsSavedGames>0</AffectsSavedGames>
+        <bzIcon>blp:gw_tablet2</bzIcon>
+        <bzIconGlow>magenta</bzIconGlow>
+    </Properties>
+    <Dependencies>
+        <Mod id="base-standard" title="LOC_MODULE_BASE_STANDARD_NAME" />
+    </Dependencies>
+    <References>
+    </References>
+    <ActionCriteria>
+        <Criteria id="always">
+            <AlwaysMet/>
+        </Criteria>
+    </ActionCriteria>
+    <ActionGroups>
+        <ActionGroup id="bz-clean-slate-always" scope="game" criteria="always">
+            <Properties>
+                <LoadOrder>50</LoadOrder>
+            </Properties>
+            <Actions>
+                <ImportFiles>
+                    <Item>ui/diplo-ribbon/bz-diplo-ribbon.css</Item>
+                </ImportFiles>
+                <UIScripts>
+                    <Item>ui/diplo-ribbon/bz-panel-diplo-ribbon.js</Item>
+                </UIScripts>
+                <UpdateIcons>
+                    <Item>data/bz-clean-slate-icons.xml</Item>
+                </UpdateIcons>
+                <UpdateText>
+                    <Item>text/en_us/InGameText.xml</Item>
+                </UpdateText>
+            </Actions>
+        </ActionGroup>
+    </ActionGroups>
+    <LocalizedText>
+        <File>text/en_us/ModInfoText.xml</File>
+    </LocalizedText>
+</Mod>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Database>
+    <EnglishText>
+        <Replace Tag="LOC_BZ_GROUPED_DIGITS">
+            <Text>{1_amount: number #,###;-#,###}</Text>
+        </Replace>
+        <Replace Tag="LOC_BZ_GROUPED_MODIFIER">
+            <Text>{1_amount: number +#,###;-#,###}</Text>
+        </Replace>
+    </EnglishText>
+</Database>
+
