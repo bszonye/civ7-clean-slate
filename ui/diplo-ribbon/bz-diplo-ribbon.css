@@ -1,0 +1,51 @@
+.bz-clean-slate {
+  --bz-color-negative: #dc1e46;
+  --bz-color-negative-text: #ff6644;  /* brighter red for black backgrounds */
+  /* yield types */
+  --bz-color-food: #80b34d;        /*  90° 40 50 green */
+  --bz-color-production: #a33d29;  /*  10° 60 40 red */
+  --bz-color-gold: #f6ce55;        /*  45° 90 65 yellow */
+  --bz-color-science: #6ca6e0;     /* 210° 65 65 cyan */
+  --bz-color-culture: #5c5cd6;     /* 240° 60 60 violet */
+  --bz-color-happiness: #f5993d;   /*  30° 90 60 orange */
+  --bz-color-diplomacy: #afb7cf;   /* 225° 25 75 gray */
+  /* yields adjusted to L70+ for text contrast */
+  --bz-color-food-text: #80b34d;
+  --bz-color-production-text: #e87b64;
+  --bz-color-gold-text: #f6ce55;
+  --bz-color-science-text: #79b3ee;
+  --bz-color-culture-text: #8d92f9;
+  --bz-color-happiness-text: #f5993d;
+  --bz-color-diplomacy-text: #afb7cf;
+}
+.bz-clean-slate .diplo-ribbon__front-banner {
+    fxs-border-image-tint: var(--player-color-primary);
+}
+.bz-clean-slate .diplo-ribbon__front-banner-overlay {
+    opacity: 0.75;
+}
+.bz-clean-slate .text-yield-food {
+    color: var(--bz-color-food-text);
+}
+.bz-clean-slate .text-yield-production {
+    color: var(--bz-color-production-text);
+}
+.bz-clean-slate .text-yield-gold {
+    color: var(--bz-color-gold-text);
+}
+.bz-clean-slate .text-yield-science {
+    color: var(--bz-color-science-text);
+}
+.bz-clean-slate .text-yield-culture {
+    color: var(--bz-color-culture-text);
+}
+.bz-clean-slate .text-yield-happiness {
+    color: var(--bz-color-happiness-text);
+}
+.bz-clean-slate .text-yield-diplomacy {
+    color: var(--bz-color-diplomacy-text);
+}
+.bz-clean-slate .text-negative,
+.bz-clean-slate .text-negative-light {
+  color: var(--bz-color-negative-text);
+}
