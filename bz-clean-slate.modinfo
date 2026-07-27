@@ -9,7 +9,7 @@
         <AffectsSavedGames>0</AffectsSavedGames>
         <bzIcon>blp:dip_warswordshield</bzIcon>
         <bzIconCrop>100</bzIconCrop>
-        <bzIconGlow>#f7e785</bzIconGlow>
+        <bzIconGlow>#c2c4cc</bzIconGlow>
     </Properties>
     <Dependencies>
         <Mod id="base-standard" title="LOC_MODULE_BASE_STANDARD_NAME" />
