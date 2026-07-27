@@ -40,10 +40,6 @@ DiploRibbonData.createPlayerYieldsData = function(player, isLocal) {
     for (const y of ydata) {
         if (y.value.match(/^[-+]\d+$/)) y.value = round(y.rawValue);
     }
-    const c = this.getImg("NAR_REW_COMBAT", isLocal);
-    const f = this.getImg("YIELD_FOOD", isLocal);
-    const p = this.getImg("YIELD_PRODUCTION", isLocal);
-    console.warn(`TRIX ${c} ${f} ${p}`);
     return [
         {
             type: "combat",
