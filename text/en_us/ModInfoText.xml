@@ -5,7 +5,7 @@
             <Text>Clean Slate</Text>
         </Row>
         <Row Tag="LOC_MOD_BZ_CLEAN_SLATE_DESCRIPTION">
-            <Text>better diplomacy ribbon stats</Text>
+            <Text>better diplomatic ribbons and yield slates</Text>
         </Row>
     </EnglishText>
 </Database>
