@@ -122,6 +122,7 @@ class bzPanelDiploRibbon {
 
 ComponentUtilities.preloadImages(
     "blp:nar_rew_combat",
+    "blp:dip_warswordshield",
 );
 Controls.decorate("panel-diplo-ribbon", (c) => new bzPanelDiploRibbon(c));
 Controls.loadStyle("fs://game/bz-clean-slate/ui/diplo-ribbon/bz-diplo-ribbon.css");
