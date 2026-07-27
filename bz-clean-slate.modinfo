@@ -7,9 +7,9 @@
         <Authors>beezany</Authors>
         <Package>Mod</Package>
         <AffectsSavedGames>0</AffectsSavedGames>
-        <bzIcon>blp:cult_literacy</bzIcon>
-        <bzIconScale>95</bzIconScale>
-        <bzIconGlow>#5c5cd6</bzIconGlow>
+        <bzIcon>blp:dip_warswordshield</bzIcon>
+        <bzIconCrop>100</bzIconCrop>
+        <bzIconGlow>#f7e785</bzIconGlow>
     </Properties>
     <Dependencies>
         <Mod id="base-standard" title="LOC_MODULE_BASE_STANDARD_NAME" />
