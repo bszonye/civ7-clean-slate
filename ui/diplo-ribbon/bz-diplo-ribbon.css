@@ -48,4 +48,5 @@
 .bz-clean-slate .text-negative,
 .bz-clean-slate .text-negative-light {
   color: var(--bz-color-negative-text);
+  text-shadow: 0 0.0555555556rem 0.1111111111rem black, 0 0 0.3333333333rem black;
 }
