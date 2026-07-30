@@ -1,4 +1,4 @@
-# Clean Slate 1.0.0
+# Clean Slate 1.0.1
 better diplomatic ribbons and yield slates
 
 ## better diplomatic ribbons
