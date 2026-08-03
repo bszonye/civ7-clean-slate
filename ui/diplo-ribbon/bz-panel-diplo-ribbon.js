@@ -136,9 +136,9 @@ class bzPanelDiploRibbon {
                     item.classList.toggle("bz-yield-max", isMax);
                 } else {
                     const isMin = y.rawValue == DiploRibbonData.bzMinYields[j];
-                    item.classList.toggle("bz-yield-min", isMin);
                     const isMax = y.rawValue == DiploRibbonData.bzMaxYields[j];
-                    item.classList.toggle("bz-yield-max", isMax);
+                    item.classList.toggle("bz-yield-min", isMin && !isMax);
+                    item.classList.toggle("bz-yield-max", isMax && !isMin);
                     const isWarning = y.warningThreshold < y.rawValue;
                     item.classList.toggle("bz-yield-warning", isWarning);
                 }
