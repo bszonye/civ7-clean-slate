@@ -24,6 +24,33 @@
 .bz-clean-slate .diplo-ribbon__front-banner-overlay {
     opacity: 0.75;
 }
+.bz-clean-slate .yield-item {
+    border-radius: 0.444em;
+    padding-left: 0.1111111111rem;
+    padding-right: 0.1666666667rem;
+}
+.bz-clean-slate .yield-value {
+    margin-left: 0.2222222222rem;
+}
+.bz-clean-slate .bz-yield-min img,
+.bz-clean-slate .bz-yield-max img {
+    filter: drop-shadow(0 0.0555555556rem 0.1111111111rem black)
+            drop-shadow(0 0 0.3333333333rem black);
+}
+.bz-clean-slate .bz-yield-min,
+.bz-clean-slate .bz-yield-max {
+    text-shadow: 0 0.0555555556rem 0.1111111111rem black, 0 0 0.3333333333rem black;
+}
+.bz-clean-slate .bz-yield-min {
+    background-color: #dc1e4644;
+}
+.bz-clean-slate .bz-yield-max {
+    background-color: #e5d2ac33;
+    font-weight: 900;
+}
+.bz-clean-slate .bz-yield-warning {
+    /* color: #e5d2ac; */
+}
 .bz-clean-slate .text-yield-food {
     color: var(--bz-color-food-text);
 }

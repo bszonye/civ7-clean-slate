@@ -1,5 +1,6 @@
 import { ComponentUtilities } from '/core/ui-next/utilities/component-utilities.js';
 import { DiploRibbonData } from '/base-standard/ui/diplo-ribbon/model-diplo-ribbon.js';
+import { InterfaceMode } from '../../../core/ui/interface-modes/interface-modes.js';
 import '/base-standard/ui/diplo-ribbon/panel-diplo-ribbon.js';
 
 const isIdeographic = Locale.getCurrentDisplayLocale().startsWith('zh_');
@@ -40,7 +41,10 @@ DiploRibbonData.createPlayerYieldsData = function(player, isLocal) {
     for (const y of ydata) {
         if (y.value.match(/^[-+]\d+$/)) y.value = round(y.rawValue);
     }
-    return [
+    // insert new data
+    ydata.splice(
+        0,
+        0,
         {
             type: "combat",
             label: Locale.compose(BZ_YIELD_COMBAT_STRENGTH),
@@ -68,46 +72,75 @@ DiploRibbonData.createPlayerYieldsData = function(player, isLocal) {
             rawValue: yieldProduction,
             warningThreshold: Infinity
         },
-        ...ydata,
-    ];
+    );
+    // calculate minimum & maximum yields
+    this.bzMinYields = [];
+    this.bzMaxYields = [];
+    for (const [i, y] of ydata.entries()) {
+        const other = this._playerData.map(p => p.yields[i]?.rawValue ?? 0);
+        const min = Math.min(y.rawValue, ...other);
+        this.bzMinYields.push(min);
+        const max = Math.max(y.rawValue, ...other);
+        this.bzMaxYields.push(max);
+    }
+    return ydata;
 }
 // refresh model with patched version
 engine.whenReady.then(() => DiploRibbonData.updateAll());
 
 class bzPanelDiploRibbon {
-    static c_prototype;
+    static c = null;
     constructor(component) {
         this.component = component;
-        this.component.bzComponent = this;
-        this.patchPrototypes(this.component);
+        this.component.bzCleanSlate = this;
         this.component.Root.classList.add("bz-clean-slate");
+        this.patchPrototype(Object.getPrototypeOf(component));
     }
-    patchPrototypes(component) {
-        const c_prototype = Object.getPrototypeOf(component);
-        if (bzPanelDiploRibbon.c_prototype == c_prototype) return;
-        // patch PanelCityDetails methods
-        const proto = bzPanelDiploRibbon.c_prototype = c_prototype;
-        // wrap render method to extend it
-        const c_populateFlags = proto.populateFlags;
-        const after_populateFlags = this.afterPopulateFlags;
+    patchPrototype(proto) {
+        if (bzPanelDiploRibbon.c) return;  // one-time initialization
+        // patch PanelDiploRibbon methods
+        const c = bzPanelDiploRibbon.c = { proto };
+        // wrap c.populateFlags to extend it
+        c.populateFlags = proto.populateFlags;
         proto.populateFlags = function(...args) {
-            const c_rv = c_populateFlags.apply(this, args);
-            const after_rv = after_populateFlags.apply(this.bzComponent, args);
-            return after_rv ?? c_rv;
+            const crv = c.populateFlags.apply(this, args);
+            const arv = this.bzCleanSlate.afterModelUpdate(...args);
+            return arv ?? crv;
+        }
+        // wrap c.onModelUpdate to extend it
+        c.onModelUpdate = proto.onModelUpdate;
+        proto.onModelUpdate = function(...args) {
+            const crv = c.onModelUpdate.apply(this, args);
+            const arv = this.bzCleanSlate.afterModelUpdate(...args);
+            return arv ?? crv;
         }
     }
     beforeAttach() { }
     afterAttach() { }
-    afterPopulateFlags() {
-        const flags = this.component.Root.querySelectorAll(".diplo-ribbon-outer");
-        for (const flag of flags) {
-            for (const item of flag.querySelectorAll(".yield-item")) {
+    afterModelUpdate() {
+        const targetArray =
+            InterfaceMode.isInInterfaceMode("INTERFACEMODE_DIPLOMACY_DIALOG") ||
+            InterfaceMode.isInInterfaceMode("INTERFACEMODE_CALL_TO_ARMS") ||
+            InterfaceMode.isInInterfaceMode("INTERFACEMODE_DIPLOMACY_PROJECT_REACTION") ?
+            DiploRibbonData.diploStatementPlayerData :
+            DiploRibbonData.playerData;
+        for (const [i, flag] of this.component.diploRibbons.entries()) {
+            const items = [...flag.querySelectorAll(".yield-item")];
+            for (const [j, y] of targetArray[i].yields.entries()) {
+                const item = items[j];
                 item.classList.replace("font-title-base", "font-body-sm");
-            }
-            for (const value of flag.querySelectorAll(".yield-value")) {
-                value.classList.add("ml-1");
-                if (value.getAttribute("data-l10n-id").startsWith("-")) {
-                    value.classList.add("text-negative");
+                item.style.backgroundImage = null;  // override other mods
+                if (y.rawValue < 0) item.classList.add("text-negative");
+                if (y.type == "trade") {
+                    const isMax = y.rawValue && y.warningThreshold <= y.rawValue;
+                    item.classList.toggle("bz-yield-max", isMax);
+                } else {
+                    const isMin = y.rawValue == DiploRibbonData.bzMinYields[j];
+                    item.classList.toggle("bz-yield-min", isMin);
+                    const isMax = y.rawValue == DiploRibbonData.bzMaxYields[j];
+                    item.classList.toggle("bz-yield-max", isMax);
+                    const isWarning = y.warningThreshold < y.rawValue;
+                    item.classList.toggle("bz-yield-warning", isWarning);
                 }
             }
         }
