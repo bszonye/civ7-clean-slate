@@ -42,9 +42,7 @@ DiploRibbonData.createPlayerYieldsData = function(player, isLocal) {
         if (y.value.match(/^[-+]\d+$/)) y.value = round(y.rawValue);
     }
     // insert new data
-    ydata.splice(
-        0,
-        0,
+    return [
         {
             type: "combat",
             label: Locale.compose(BZ_YIELD_COMBAT_STRENGTH),
@@ -72,18 +70,8 @@ DiploRibbonData.createPlayerYieldsData = function(player, isLocal) {
             rawValue: yieldProduction,
             warningThreshold: Infinity
         },
-    );
-    // calculate minimum & maximum yields
-    this.bzMinYields = [];
-    this.bzMaxYields = [];
-    for (const [i, y] of ydata.entries()) {
-        const other = this._playerData.map(p => p.yields[i]?.rawValue ?? 0);
-        const min = Math.min(y.rawValue, ...other);
-        this.bzMinYields.push(min);
-        const max = Math.max(y.rawValue, ...other);
-        this.bzMaxYields.push(max);
-    }
-    return ydata;
+        ...ydata
+    ];
 }
 // refresh model with patched version
 engine.whenReady.then(() => DiploRibbonData.updateAll());
@@ -118,6 +106,20 @@ class bzPanelDiploRibbon {
     beforeAttach() { }
     afterAttach() { }
     afterModelUpdate() {
+        // calculate minimum & maximum yields for all visible players
+        const yrows = [];
+        for (const pdata of DiploRibbonData.playerData) {
+            for (const [i, y] of pdata.yields.entries()) {
+                yrows[i] ??= [];
+                yrows[i].push(y.rawValue);
+            }
+        }
+        const minYields = yrows.map(row => Math.min(...row));
+        const maxYields = yrows.map(row => Math.max(...row));
+        console.warn(`TRIX ROWS ${JSON.stringify(yrows)}`);
+        console.warn(`TRIX MIN ${JSON.stringify(minYields)}`);
+        console.warn(`TRIX MAX ${JSON.stringify(maxYields)}`);
+        // restyle ribbon yields
         const targetArray =
             InterfaceMode.isInInterfaceMode("INTERFACEMODE_DIPLOMACY_DIALOG") ||
             InterfaceMode.isInInterfaceMode("INTERFACEMODE_CALL_TO_ARMS") ||
@@ -128,15 +130,18 @@ class bzPanelDiploRibbon {
             const items = [...flag.querySelectorAll(".yield-item")];
             for (const [j, y] of targetArray[i].yields.entries()) {
                 const item = items[j];
+                // override other mods
+                item.style.backgroundImage = null;
+                // adjust font and color
                 item.classList.replace("font-title-base", "font-body-sm");
-                item.style.backgroundImage = null;  // override other mods
                 if (y.rawValue < 0) item.classList.add("text-negative");
+                // highlight minimums and maximums
                 if (y.type == "trade") {
                     const isMax = y.rawValue && y.warningThreshold <= y.rawValue;
                     item.classList.toggle("bz-yield-max", isMax);
                 } else {
-                    const isMin = y.rawValue == DiploRibbonData.bzMinYields[j];
-                    const isMax = y.rawValue == DiploRibbonData.bzMaxYields[j];
+                    const isMin = y.rawValue == minYields[j];
+                    const isMax = y.rawValue == maxYields[j];
                     item.classList.toggle("bz-yield-min", isMin && !isMax);
                     item.classList.toggle("bz-yield-max", isMax && !isMin);
                     const isWarning = y.warningThreshold < y.rawValue;
