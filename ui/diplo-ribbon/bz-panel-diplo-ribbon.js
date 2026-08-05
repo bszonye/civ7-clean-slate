@@ -128,7 +128,9 @@ class bzPanelDiploRibbon {
             DiploRibbonData.playerData;
         for (const [i, flag] of this.component.diploRibbons.entries()) {
             const items = [...flag.querySelectorAll(".yield-item")];
-            for (const [j, y] of targetArray[i].yields.entries()) {
+            const pdata = targetArray[i];
+            const isLocal = pdata.id == GameContext.localObserverID;
+            for (const [j, y] of pdata.yields.entries()) {
                 const item = items[j];
                 // override other mods
                 item.style.backgroundImage = null;
@@ -142,7 +144,7 @@ class bzPanelDiploRibbon {
                 } else {
                     const isMin = y.rawValue == minYields[j];
                     const isMax = y.rawValue == maxYields[j];
-                    item.classList.toggle("bz-yield-min", isMin && !isMax);
+                    item.classList.toggle("bz-yield-min", isLocal && isMin && !isMax);
                     item.classList.toggle("bz-yield-max", isMax && !isMin);
                     const isWarning = y.warningThreshold < y.rawValue;
                     item.classList.toggle("bz-yield-warning", isWarning);
