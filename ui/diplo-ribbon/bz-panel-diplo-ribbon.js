@@ -38,6 +38,7 @@ DiploRibbonData.createPlayerYieldsData = function(player, isLocal) {
         .reduce((a, c) => a + c, 0) ?? 0;
     // adjust vanilla format
     const ydata = DRD_createPlayerYieldsData.call(this, player, isLocal);
+    if (!ydata?.length) return ydata;  // diplomacy dialogs don't show yields
     for (const y of ydata) {
         if (y.value.match(/^[-+]\d+$/)) y.value = round(y.rawValue);
     }
