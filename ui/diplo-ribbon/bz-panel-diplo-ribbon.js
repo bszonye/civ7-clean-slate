@@ -157,6 +157,10 @@ class bzPanelDiploRibbon {
     afterDetach() { }
 }
 
+// track unit gains and losses
+engine.on("UnitAddedToMap", DiploRibbonData.queueUpdate, DiploRibbonData);
+engine.on("UnitRemovedFromMap", DiploRibbonData.queueUpdate, DiploRibbonData);
+
 ComponentUtilities.preloadImages(
     "blp:dip_warswordshield",
     "blp:nar_rew_combat",
