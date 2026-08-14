@@ -143,7 +143,7 @@ class bzPanelDiploRibbon {
                     item.classList.toggle("bz-yield-max", isMax);
                 } else {
                     const isLocalMin = localYields?.[j].rawValue == minYields[j];
-                    const showMin = 5 <= targetArray.length + (2 * isLocalMin);
+                    const showMin = 4 <= targetArray.length + isLocalMin;
                     const isMin = y.rawValue == minYields[j];
                     const isMax = y.rawValue == maxYields[j];
                     if (localYields && 3 <= targetArray.length) {
