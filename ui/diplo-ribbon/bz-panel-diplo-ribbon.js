@@ -117,9 +117,6 @@ class bzPanelDiploRibbon {
         }
         const minYields = yrows.map(row => Math.min(...row));
         const maxYields = yrows.map(row => Math.max(...row));
-        console.warn(`TRIX ROWS ${JSON.stringify(yrows)}`);
-        console.warn(`TRIX MIN ${JSON.stringify(minYields)}`);
-        console.warn(`TRIX MAX ${JSON.stringify(maxYields)}`);
         // restyle ribbon yields
         const targetArray =
             InterfaceMode.isInInterfaceMode("INTERFACEMODE_DIPLOMACY_DIALOG") ||
@@ -127,10 +124,12 @@ class bzPanelDiploRibbon {
             InterfaceMode.isInInterfaceMode("INTERFACEMODE_DIPLOMACY_PROJECT_REACTION") ?
             DiploRibbonData.diploStatementPlayerData :
             DiploRibbonData.playerData;
+        const localData = targetArray.find(e => e.id == GameContext.localObserverID);
+        const localYields = localData?.yields;
         for (const [i, flag] of this.component.diploRibbons.entries()) {
             const items = [...flag.querySelectorAll(".yield-item")];
             const pdata = targetArray[i];
-            const isLocal = pdata.id == GameContext.localObserverID;
+            // const isLocal = pdata.id == GameContext.localObserverID;
             for (const [j, y] of pdata.yields.entries()) {
                 const item = items[j];
                 // override other mods
@@ -143,9 +142,17 @@ class bzPanelDiploRibbon {
                     const isMax = y.rawValue && y.warningThreshold <= y.rawValue;
                     item.classList.toggle("bz-yield-max", isMax);
                 } else {
+                    const isLocalMin = localYields?.[j].rawValue == minYields[j];
+                    const showMin = 5 <= targetArray.length + (2 * isLocalMin);
                     const isMin = y.rawValue == minYields[j];
                     const isMax = y.rawValue == maxYields[j];
-                    item.classList.toggle("bz-yield-min", isLocal && isMin && !isMax);
+                    if (localYields && 3 <= targetArray.length) {
+                        // highlight yields higher than local player
+                        const showMore = !showMin || !isLocalMin;
+                        const isMore = localYields[j].rawValue < y.rawValue;
+                        item.classList.toggle("bz-yield-more", showMore && isMore);
+                    }
+                    item.classList.toggle("bz-yield-min", showMin && isMin && !isMax);
                     item.classList.toggle("bz-yield-max", isMax && !isMin);
                     const isWarning = y.warningThreshold < y.rawValue;
                     item.classList.toggle("bz-yield-warning", isWarning);
