@@ -1,4 +1,4 @@
-# Clean Slate 1.0.0
+# Clean Slate 1.1.0
 better diplomatic ribbons and yield slates
 
 ## better diplomatic ribbons
@@ -7,6 +7,7 @@ better diplomatic ribbons and yield slates
 
 ## better yield slates
 - new totals for combat strength, food, and city production
+- highlighting for minimum and maximum yields
 - lining numbers for easier comparison between rows and columns
 - thousands separators for large numbers
 - brighter colors for easier reading against the slate background

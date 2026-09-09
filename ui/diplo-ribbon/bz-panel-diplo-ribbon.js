@@ -1,5 +1,6 @@
 import { ComponentUtilities } from '/core/ui-next/utilities/component-utilities.js';
 import { DiploRibbonData } from '/base-standard/ui/diplo-ribbon/model-diplo-ribbon.js';
+import { InterfaceMode } from '../../../core/ui/interface-modes/interface-modes.js';
 import '/base-standard/ui/diplo-ribbon/panel-diplo-ribbon.js';
 
 const isIdeographic = Locale.getCurrentDisplayLocale().startsWith('zh_');
@@ -37,9 +38,11 @@ DiploRibbonData.createPlayerYieldsData = function(player, isLocal) {
         .reduce((a, c) => a + c, 0) ?? 0;
     // adjust vanilla format
     const ydata = DRD_createPlayerYieldsData.call(this, player, isLocal);
+    if (!ydata?.length) return ydata;  // diplomacy dialogs don't show yields
     for (const y of ydata) {
         if (y.value.match(/^[-+]\d+$/)) y.value = round(y.rawValue);
     }
+    // insert new data
     return [
         {
             type: "combat",
@@ -68,46 +71,91 @@ DiploRibbonData.createPlayerYieldsData = function(player, isLocal) {
             rawValue: yieldProduction,
             warningThreshold: Infinity
         },
-        ...ydata,
+        ...ydata
     ];
 }
 // refresh model with patched version
 engine.whenReady.then(() => DiploRibbonData.updateAll());
 
 class bzPanelDiploRibbon {
-    static c_prototype;
+    static c = null;
     constructor(component) {
         this.component = component;
-        this.component.bzComponent = this;
-        this.patchPrototypes(this.component);
+        this.component.bzCleanSlate = this;
         this.component.Root.classList.add("bz-clean-slate");
+        this.patchPrototype(Object.getPrototypeOf(component));
     }
-    patchPrototypes(component) {
-        const c_prototype = Object.getPrototypeOf(component);
-        if (bzPanelDiploRibbon.c_prototype == c_prototype) return;
-        // patch PanelCityDetails methods
-        const proto = bzPanelDiploRibbon.c_prototype = c_prototype;
-        // wrap render method to extend it
-        const c_populateFlags = proto.populateFlags;
-        const after_populateFlags = this.afterPopulateFlags;
+    patchPrototype(proto) {
+        if (bzPanelDiploRibbon.c) return;  // one-time initialization
+        // patch PanelDiploRibbon methods
+        const c = bzPanelDiploRibbon.c = { proto };
+        // wrap c.populateFlags to extend it
+        c.populateFlags = proto.populateFlags;
         proto.populateFlags = function(...args) {
-            const c_rv = c_populateFlags.apply(this, args);
-            const after_rv = after_populateFlags.apply(this.bzComponent, args);
-            return after_rv ?? c_rv;
+            const crv = c.populateFlags.apply(this, args);
+            const arv = this.bzCleanSlate.afterModelUpdate(...args);
+            return arv ?? crv;
+        }
+        // wrap c.onModelUpdate to extend it
+        c.onModelUpdate = proto.onModelUpdate;
+        proto.onModelUpdate = function(...args) {
+            const crv = c.onModelUpdate.apply(this, args);
+            const arv = this.bzCleanSlate.afterModelUpdate(...args);
+            return arv ?? crv;
         }
     }
     beforeAttach() { }
     afterAttach() { }
-    afterPopulateFlags() {
-        const flags = this.component.Root.querySelectorAll(".diplo-ribbon-outer");
-        for (const flag of flags) {
-            for (const item of flag.querySelectorAll(".yield-item")) {
-                item.classList.replace("font-title-base", "font-body-sm");
+    afterModelUpdate() {
+        // calculate minimum & maximum yields for all visible players
+        const yrows = [];
+        for (const pdata of DiploRibbonData.playerData) {
+            for (const [i, y] of pdata.yields.entries()) {
+                yrows[i] ??= [];
+                yrows[i].push(y.rawValue);
             }
-            for (const value of flag.querySelectorAll(".yield-value")) {
-                value.classList.add("ml-1");
-                if (value.getAttribute("data-l10n-id").startsWith("-")) {
-                    value.classList.add("text-negative");
+        }
+        const minYields = yrows.map(row => Math.min(...row));
+        const maxYields = yrows.map(row => Math.max(...row));
+        // restyle ribbon yields
+        const targetArray =
+            InterfaceMode.isInInterfaceMode("INTERFACEMODE_DIPLOMACY_DIALOG") ||
+            InterfaceMode.isInInterfaceMode("INTERFACEMODE_CALL_TO_ARMS") ||
+            InterfaceMode.isInInterfaceMode("INTERFACEMODE_DIPLOMACY_PROJECT_REACTION") ?
+            DiploRibbonData.diploStatementPlayerData :
+            DiploRibbonData.playerData;
+        const localData = targetArray.find(e => e.id == GameContext.localObserverID);
+        const localYields = localData?.yields;
+        for (const [i, flag] of this.component.diploRibbons.entries()) {
+            const items = [...flag.querySelectorAll(".yield-item")];
+            const pdata = targetArray[i];
+            // const isLocal = pdata.id == GameContext.localObserverID;
+            for (const [j, y] of pdata.yields.entries()) {
+                const item = items[j];
+                // override other mods
+                item.style.backgroundImage = null;
+                // adjust font and color
+                item.classList.replace("font-title-base", "font-body-sm");
+                if (y.rawValue < 0) item.classList.add("text-negative");
+                // highlight minimums and maximums
+                if (y.type == "trade") {
+                    const isMax = y.rawValue && y.warningThreshold <= y.rawValue;
+                    item.classList.toggle("bz-yield-max", isMax);
+                } else {
+                    const isLocalMin = localYields?.[j].rawValue == minYields[j];
+                    const showMin = 4 <= targetArray.length + isLocalMin;
+                    const isMin = y.rawValue == minYields[j];
+                    const isMax = y.rawValue == maxYields[j];
+                    if (localYields && 3 <= targetArray.length) {
+                        // highlight yields higher than local player
+                        const showMore = !showMin || !isLocalMin;
+                        const isMore = localYields[j].rawValue < y.rawValue;
+                        item.classList.toggle("bz-yield-more", showMore && isMore);
+                    }
+                    item.classList.toggle("bz-yield-min", showMin && isMin && !isMax);
+                    item.classList.toggle("bz-yield-max", isMax && !isMin);
+                    const isWarning = y.warningThreshold < y.rawValue;
+                    item.classList.toggle("bz-yield-warning", isWarning);
                 }
             }
         }
@@ -115,6 +163,10 @@ class bzPanelDiploRibbon {
     beforeDetach() { }
     afterDetach() { }
 }
+
+// track unit gains and losses
+engine.on("UnitAddedToMap", DiploRibbonData.queueUpdate, DiploRibbonData);
+engine.on("UnitRemovedFromMap", DiploRibbonData.queueUpdate, DiploRibbonData);
 
 ComponentUtilities.preloadImages(
     "blp:dip_warswordshield",
